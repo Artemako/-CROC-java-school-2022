@@ -1,6 +1,6 @@
 package ru.croc.lessons.lesson2;
 
-public class Example1 {
+public class Example {
     public static void main(String[] args) {
         // comment on one line
 
