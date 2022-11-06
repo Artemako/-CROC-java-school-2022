@@ -4,7 +4,7 @@ public class Task5 {
     public static void main(String[] args) {
         Annotation[] annotations = new Annotation[3];
 
-        Figure figure0 = new Figure();
+        Figure figure0 = new Circle(-5, -7, 9);
         Annotation annotation0 = new Annotation(figure0, "Something");
         annotations[0] = annotation0;
 
@@ -17,7 +17,7 @@ public class Task5 {
         annotations[2] = annotation2;
 
         AnnotatedImage annotatedImage = new AnnotatedImage("Path/alsoPath", annotations);
-        annotatedImage.printAnnotations();
+        System.out.println(annotatedImage);
 
         Annotation a = annotatedImage.findByPoint(5, 10);
         System.out.println(a);

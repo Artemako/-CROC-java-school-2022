@@ -17,10 +17,15 @@ public class AnnotatedImage {
         return this.annotations;
     }
 
-    public void printAnnotations() {
+    @Override
+    public String toString() {
+        System.out.println("Start AnnotatedImage.");
+        int i = 1;
         for (Annotation annotation : annotations) {
-            System.out.println(annotation);
+            System.out.println(i + ") " + annotation);
+            i++;
         }
+        return "End AnnotatedImage.";
     }
 
     public Annotation findByPoint(int x, int y) {
@@ -29,8 +34,7 @@ public class AnnotatedImage {
                 return annotation;
             }
         }
-        System.out.println("No results.");
-        return new Annotation(new Figure(), "");
+        return null;
     }
 
     public Annotation findByLabel(String label) {
@@ -39,8 +43,7 @@ public class AnnotatedImage {
                 return annotation;
             }
         }
-        System.out.println("No results.");
-        return new Annotation(new Figure(), "");
+        return null;
     }
 
 

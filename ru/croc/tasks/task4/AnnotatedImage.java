@@ -17,10 +17,15 @@ public class AnnotatedImage {
         return this.annotations;
     }
 
-    public void printAnnotations() {
+    @Override
+    public String toString() {
+        System.out.println("Start AnnotatedImage.");
+        int i = 1;
         for (Annotation annotation : annotations) {
-            System.out.println(annotation);
+            System.out.println(i + ") " + annotation);
+            i++;
         }
+        return "End AnnotatedImage.";
     }
 
 }

@@ -1,6 +1,6 @@
 package ru.croc.tasks.task5;
 
-public class Figure implements Moveable{
+public abstract class Figure implements Moveable {
     public boolean checkByPoint(int x, int y) {
         return false;
     }
