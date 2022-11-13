@@ -11,13 +11,16 @@ public class Task7 {
         String inputMoves = in.nextLine();
         try {
             String[] stringMoves = inputMoves.split(", ");
-
             ChessPosition[] moves = new ChessPosition[stringMoves.length];
+            ChessPositionFactory myChessPositionFactory = new ChessPositionFactory();
+
             for (int i = 0; i < stringMoves.length; i++) {
-                moves[i] = new ChessPosition(stringMoves[i]);
+                moves[i] = myChessPositionFactory.createChessPosition(stringMoves[i]);
             }
 
-            ChessPosition.checkMoves(moves);
+            KnightMovesChecker.checkMoves(moves);
+            System.out.println(moves[0]);
+
 
         } catch (IllegalPositionException | IllegalMoveException e) {
             System.out.println(e);
