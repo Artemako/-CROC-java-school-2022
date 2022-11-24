@@ -15,7 +15,10 @@ public class Server {
                 Socket socket = server.accept();
                 System.out.println("Новое соединение.");
                 try {
-                    serverList.add(new ServerCommunication(socket));
+                    ServerCommunication element = new ServerCommunication(socket);
+                    element.startThread();
+                    serverList.add(element);
+
                 } catch (Exception e) {
                     socket.close();
                 }

@@ -23,7 +23,7 @@ public class Lot{
 
     public void acceptTheBet(Bet bet) {
             synchronized (this) {
-                if (bet.cost > this.currentCost && bet.time.isBefore(this.timeEnd)) {
+                if (bet.cost > this.currentCost && LocalDateTime.now().isBefore(this.timeEnd)) {
                     this.currentCost = bet.cost;
                     this.username = bet.username;
                     System.out.println("The bet (" + bet + ") accepted");

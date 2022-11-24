@@ -16,6 +16,9 @@ class ClientCommunication {
     private Date time;
     private String hhmmssTime;
 
+    private Thread threadReadMessages;
+    private Thread threadWriteMessages;
+
     public ClientCommunication(String address, int port) {
         this.address = address;
         this.port = port;
@@ -28,6 +31,8 @@ class ClientCommunication {
             reader = new BufferedReader(new InputStreamReader(System.in));
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+            threadReadMessages = new Thread(new ReadMessages());
+            threadWriteMessages = new Thread(new WriteMessages());
 
             System.out.print("Введите никнейм: ");
             try {
@@ -37,12 +42,16 @@ class ClientCommunication {
             } catch (IOException ignored) {
             }
 
-            new ReadMessages().start();
-            new WriteMessages().start();
 
         } catch (Exception e) {
             ClientCommunication.this.downClient();
         }
+    }
+
+    public void startThreads() {
+        System.out.println("startThreads");
+        threadReadMessages.start();
+        threadWriteMessages.start();
     }
 
     private void downClient() {
@@ -55,7 +64,7 @@ class ClientCommunication {
         } catch (IOException ignored) {}
     }
 
-    private class ReadMessages extends Thread {
+    private class ReadMessages implements Runnable {
         @Override
         public void run() {
             String message;
@@ -74,7 +83,7 @@ class ClientCommunication {
         }
     }
 
-    public class WriteMessages extends Thread {
+    public class WriteMessages implements Runnable {
         @Override
         public void run() {
             while (true) {
@@ -98,4 +107,6 @@ class ClientCommunication {
             }
         }
     }
+
+
 }

@@ -11,12 +11,12 @@ public class Task10 {
         try {
             Thread[] allThreads = new Thread[3];
             for (int i = 0; i < 3; i++) {
-                allThreads[i] = new Thread(new createThread());
+                allThreads[i] = new Thread(new CreateThread());
                 allThreads[i].start();
             }
 
-            for (int i = 0; i < 3; ++i) {
-                allThreads[i].join();
+            for (Thread thread : allThreads) {
+                thread.join();
             }
 
             System.out.println(lot.getWinner());
