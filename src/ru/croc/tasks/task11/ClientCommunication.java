@@ -28,6 +28,7 @@ class ClientCommunication {
             System.out.println("Ошибка при подключении сокета.");
         }
         try {
+
             reader = new BufferedReader(new InputStreamReader(System.in));
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
@@ -37,6 +38,7 @@ class ClientCommunication {
             System.out.print("Введите никнейм: ");
             try {
                 nickname = reader.readLine();
+                //System.out.println("Привет, " + nickname + ".\n");
                 out.write("Привет, " + nickname + ".\n");
                 out.flush();
             } catch (IOException ignored) {
@@ -49,7 +51,7 @@ class ClientCommunication {
     }
 
     public void startThreads() {
-        System.out.println("startThreads");
+        //System.out.println("startThreads");
         threadReadMessages.start();
         threadWriteMessages.start();
     }
@@ -69,9 +71,12 @@ class ClientCommunication {
         public void run() {
             String message;
             try {
+                //System.out.println(socket.isConnected());
                 while (true) {
                     message = in.readLine();
+                    //System.out.println(message);
                     if (message.equals("logout")) {
+                        System.out.println("Есть logout");
                         ClientCommunication.this.downClient();
                         break;
                     }

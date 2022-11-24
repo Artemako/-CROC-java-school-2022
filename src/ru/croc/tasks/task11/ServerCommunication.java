@@ -6,7 +6,7 @@ import java.net.Socket;
 class ServerCommunication {
     private Socket socket;
     private BufferedReader in;
-    private BufferedWriter out;
+    private  BufferedWriter out;
 
     private Thread threadServerMessages;
 
@@ -14,7 +14,7 @@ class ServerCommunication {
         this.socket = socket;
         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-        Thread threadServerMessages = new Thread(new ServerMessages());
+        threadServerMessages = new Thread(new ServerMessages());
     }
 
     public void startThread() {
