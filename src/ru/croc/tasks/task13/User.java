@@ -29,8 +29,7 @@ public class User {
     }
 
     public void reloadDataUser() {
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(fileIdUsers));
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileIdUsers))) {
             String line = reader.readLine();
             while (line != null) {
                 String[] idAndFilms = line.split(" ");
@@ -43,8 +42,6 @@ public class User {
                 }
                 line = reader.readLine();
             }
-            reader.close();
-
         } catch (IOException e) {
             //System.out.println("Файл id_users.txt не был найден/прочитан.");
         }
@@ -53,7 +50,7 @@ public class User {
     public void recommendation() {
         List<User> usersWatchedSameFilms = new ArrayList<>();
         for (User user : allActiveUsers) {
-            if (compareFilmsOfUsers(this, user) && this != user)
+            if (this != user && this.isUserFitForRecommendations(user))
                 usersWatchedSameFilms.add(user);
         }
         //System.out.println(usersWatchedSameFilms);
@@ -102,8 +99,7 @@ public class User {
 
     private String getNameFilmByIdFilm(String idFilm) {
         String nameFilmByIdFilm = new String();
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(fileIdFilms));
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileIdFilms))) {
             String line = reader.readLine();
             while (line != null) {
                 String[] idFilmAndNameFilm = line.split(",");
@@ -113,24 +109,21 @@ public class User {
                 }
                 line = reader.readLine();
             }
-
-            reader.close();
-
         } catch (IOException e) {
             //System.out.println("Файл films.txt не был найден/прочитан.");
         }
         return nameFilmByIdFilm;
     }
 
-    private boolean compareFilmsOfUsers(User firstUser, User secondUser) {
+    private boolean isUserFitForRecommendations(User anotherUser) {
         HashSet<String> sameFilms = new HashSet<>();
-        for (String idFirstUserFilm : firstUser.idUserWatchedFilms) {
-            for (String idSecondUserFilm : secondUser.idUserWatchedFilms) {
+        for (String idFirstUserFilm : this.idUserWatchedFilms) {
+            for (String idSecondUserFilm : anotherUser.idUserWatchedFilms) {
                 if (idFirstUserFilm.equals(idSecondUserFilm))
                     sameFilms.add(idSecondUserFilm);
             }
         }
-        if (sameFilms.size() >= Math.round(firstUser.idUserWatchedFilms.size() / 2.0)) {
+        if (sameFilms.size() >= Math.round(anotherUser.idUserWatchedFilms.size() / 2.0)) {
             return true;
         }
         return false;
