@@ -1,12 +1,15 @@
 package src.ru.croc.tasks.task14;
 
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
 import java.util.function.Predicate;
 
 public interface BlackListFilter<T> {
+
+    /**
+     * From the given list of comments removes ones
+     * that contain words from the black list.
+     */
+    //void filterComments(List<String> comments, Set<String> blackList);
 
     /**
      * From the given list of comments removes ones

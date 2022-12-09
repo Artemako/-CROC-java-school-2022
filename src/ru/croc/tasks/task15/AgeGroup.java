@@ -2,7 +2,7 @@ package src.ru.croc.tasks.task15;
 
 import java.util.ArrayList;
 
-public class ageGroup {
+public class AgeGroup {
     private final int lowerBorder;
     private ArrayList<Respondent> respondents = new ArrayList<>();
 
@@ -11,7 +11,7 @@ public class ageGroup {
         return this.respondents.toString();
     }
 
-    public ageGroup(int lowerBorder, ArrayList<Respondent> respondents) {
+    public AgeGroup(int lowerBorder, ArrayList<Respondent> respondents) {
         this.lowerBorder = lowerBorder;
         this.respondents = respondents;
     }
