@@ -21,7 +21,6 @@ public interface BlackListFilter<T> {
      * @param blackList list of words that should not
      *                  be present in a comment
      */
-    //void filterComments(List<String> comments, Set<String> blackList);
     default ArrayList<T> filterComments(Iterable<T> comments, Predicate<T> blackList) {
         ArrayList<T> filterResult = new ArrayList<>();
         for (T comment : comments) {
@@ -29,5 +28,7 @@ public interface BlackListFilter<T> {
                 filterResult.add(comment);
         }
         return filterResult;
+
+
     }
 }

@@ -25,7 +25,7 @@ public class Task17 {
 
     }
 
-    static void readFileCSV(String path,ArrayList<Order> orders, ArrayList<Product> product) {
+    public static void readFileCSV(String path, ArrayList<Order> orders, ArrayList<Product> product) {
         Scanner scanner;
         try {
             scanner = new Scanner(Paths.get(path));
@@ -41,16 +41,16 @@ public class Task17 {
                 product.add(new Product(fields[2], fields[3], Integer.parseInt(fields[4])));
         }
     }
-    static void createTablesInDatabase(Connection connection) throws SQLException {
+    public static void createTablesInDatabase(Connection connection) throws SQLException {
         try (Statement statement = connection.createStatement()){
             statement.execute("CREATE TABLE Products" +
                     "(id VARCHAR(255) PRIMARY KEY, name VARCHAR(255), cost INT);");
             statement.execute("CREATE TABLE Orders" +
                     "(id INT, username VARCHAR(255), article VARCHAR(255), " +
-                    "foreign key (Article) references Products(id));");
+                    "foreign key (article) references Products(id));");
         }
     }
-    static void addProductsToDatabase(Connection connection, ArrayList<Product> products) throws SQLException{
+    public static void addProductsToDatabase(Connection connection, ArrayList<Product> products) throws SQLException{
         String sql = "INSERT INTO Products VALUES(?,?,?)";
         for (Product product : products) {
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -62,7 +62,7 @@ public class Task17 {
         }
     }
 
-    static void addOrdersToDatabase(Connection connection, ArrayList<Order> orders) throws SQLException {
+    public static void addOrdersToDatabase(Connection connection, ArrayList<Order> orders) throws SQLException {
         String sql = "INSERT INTO Orders VALUES(?,?,?)";
         for (Order order : orders) {
             try (PreparedStatement statement = connection.prepareStatement(sql)) {

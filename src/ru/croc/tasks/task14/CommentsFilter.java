@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class CommentsFilter {
+public class CommentsFilter implements BlackListFilter {
 
     public void filterComments(List<String> comments, Set<String> blackList) {
         // скорее всего, можно было решить при помощи regex, но мне ЛЕНЬ
