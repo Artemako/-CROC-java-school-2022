@@ -10,8 +10,10 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 import java.io.IOException;
+import java.sql.*;
 import java.util.HashMap;
 import java.util.Optional;
+
 
 public class Bot extends TelegramLongPollingBot {
 
@@ -32,6 +34,7 @@ public class Bot extends TelegramLongPollingBot {
         Bot bot = new Bot();
         TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
         telegramBotsApi.registerBot(bot);
+        bot.createDB();
     }
 
     @Override
@@ -43,26 +46,91 @@ public class Bot extends TelegramLongPollingBot {
 
 
     private void handleMessage(Message message) {
+        Data thisData = data.get(message.getChatId());
         if (message.hasText() && message.hasEntities()) {
             Optional<MessageEntity> commandEntity = message.getEntities().stream().filter(e -> "bot_command".equals(e.getType())).findFirst();
             if (commandEntity.isPresent()) {
                 String command = message.getText().substring(commandEntity.get().getOffset(), commandEntity.get().getLength());
-                if ("/start_test".equals(command)) {
-                    System.out.println("start_test");
-                    startTest(message);
-                } else if ("/finish_test".equals(command)) {
-                    System.out.println("finish_test");
-                    finishTest(message);
+                switch (command) {
+                    case "/start_test":
+                        System.out.println("start_test");
+                        startTest(message);
+                        break;
+                    case "/finish_test":
+                        System.out.println("finish_test");
+                        if (thisData.testStatus.equals("off")) {
+                            try {
+                                execute(
+                                        SendMessage.builder()
+                                                .text("Вы еще не начали тестирование.")
+                                                .chatId(message.getChatId().toString())
+                                                .build());
+                            } catch (TelegramApiException e) {
+                                throw new RuntimeException(e);
+                            }
+                        } else {
+                            finishTest(message);
+                        }
+                        break;
+                    case "/help":
+                        try {
+                            execute(
+                                    SendMessage.builder()
+                                            .text("""
+                                                    ВСЕ КОМАНДЫ.
+                                                    <code>/start_test</code> - Начать тестирование
+                                                    <code>/finish_test</code> - Завершить тестирование
+                                                    <code>/help</code> - Помощь по командам
+                                                    <code>/about</code> - О боте
+                                                    <code>/statistics</code> - Ваша статистика
+                                                    """
+                                            )
+                                            .chatId(message.getChatId().toString())
+                                            .parseMode("HTML")
+                                            .build());
+                        } catch (TelegramApiException e) {
+                            throw new RuntimeException(e);
+                        }
+                        break;
+                    case "/about":
+                        try {
+                            execute(
+                                    SendMessage.builder()
+                                            .text("""
+                                                    ОБ БОТЕ.
+                                                    Бот является ИП Акопяна Артёма на тему 'Тестирование на знание транскрипции слованглийского языка через чат-бота Telegram.'
+                                                    Фантазии у автора нет, поэтому это всё."""
+                                            )
+                                            .chatId(message.getChatId().toString())
+                                            .parseMode("HTML")
+                                            .build());
+                        } catch (TelegramApiException e) {
+                            throw new RuntimeException(e);
+                        }
+                        break;
+                    case "/statistics":
+                        watchResultsDB(message);
+                        break;
                 }
             }
         } else if (message.hasText()) {
-            Data thisData = data.get(message.getChatId());
             if (thisData.testStatus.equals("active")) {
                 checkAnswer(message);
                 createTestQuestion(message);
+            } else {
+                try {
+                    execute(
+                            SendMessage.builder()
+                                    .text("Я ничего не понял из того, что вы сейчас сказали.")
+                                    .chatId(message.getChatId().toString())
+                                    .build());
+                } catch (TelegramApiException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
     }
+
 
     private void startTest(Message message) {
         Data thisData = new Data();
@@ -94,6 +162,71 @@ public class Bot extends TelegramLongPollingBot {
             execute(
                     SendMessage.builder()
                             .text("Завершение тестирования.")
+                            .chatId(message.getChatId().toString())
+                            .build());
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
+        }
+        watchResult(message);
+        addToResultsDB(message);
+        watchResultsDB(message);
+    }
+
+    private void addToResultsDB(Message message) {
+        try (Connection connection = DriverManager.getConnection("jdbc:h2:mem:default", "sa", "")) {
+            Data thisData = data.get(message.getChatId());
+            PreparedStatement statement = connection.prepareStatement("INSERT INTO STATISTICS (ID, QUESTIONS, RIGHT_ANSWERS) VALUES(?,?,?)");
+            statement.setString(1, message.getChatId().toString());
+            statement.setInt(2, thisData.numberOfQuestion);
+            statement.setInt(3, thisData.numberOfRightAnswers);
+            statement.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void watchResultsDB(Message message) {
+        try (Connection connection = DriverManager.getConnection("jdbc:h2:mem:default", "sa", "")) {
+            Statement statement = connection.createStatement();
+            ResultSet result = statement.executeQuery("SELECT ID, QUESTIONS, RIGHT_ANSWERS FROM STATISTICS");
+            while (result.next()) {
+                int qq = result.getInt("QUESTIONS");
+                int ra = result.getInt("RIGHT_ANSWERS");
+                System.out.println(qq + " " + ra);
+            }
+            connection.commit();
+        } catch (SQLException ex) {
+            throw new RuntimeException(ex);
+        }
+
+
+}
+
+    private void createDB() {
+        try (Connection connection = DriverManager.getConnection("jdbc:h2:mem:default", "sa", "")) {
+            Statement statement = connection.createStatement();
+            statement.execute("""
+                    CREATE TABLE STATISTICS (
+                    id VARCHAR(255) NOT NULL,
+                    questions INTEGER NOT NULL DEFAULT 0,
+                    right_answers INTEGER NOT NULL DEFAULT 0,
+                    PRIMARY KEY(id)
+                    )""");
+            connection.commit();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void watchResult(Message message) {
+        Data thisData = data.get(message.getChatId());
+        try {
+            execute(
+                    SendMessage.builder()
+                            .text("Результат.\n" +
+                                    "✅ " + thisData.numberOfRightAnswers + " из " + thisData.numberOfQuestion)
                             .chatId(message.getChatId().toString())
                             .build());
         } catch (TelegramApiException e) {
@@ -132,7 +265,7 @@ public class Bot extends TelegramLongPollingBot {
                                 .text("Это правильный ответ.")
                                 .chatId(message.getChatId().toString())
                                 .build());
-
+                thisData.numberOfRightAnswers += 1;
             } else {
                 execute(
                         SendMessage.builder()
@@ -149,6 +282,7 @@ public class Bot extends TelegramLongPollingBot {
         }
 
     }
+
 
     private void createTestQuestion(Message message) {
         try {
