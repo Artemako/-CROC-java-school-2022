@@ -9,6 +9,8 @@ public class Data {
     public String testStatus = "off";
     public int numberOfQuestion = 0;
     public int numberOfRightAnswers = 0;
+    public int globalNumberOfQuestion = 0;
+    public int globalNumberOfRightAnswers = 0;
 
     public Data(){
         this.currentWord = new Word();
@@ -16,5 +18,7 @@ public class Data {
         this.testStatus = "off";
         this.numberOfQuestion = 0;
         this.numberOfRightAnswers = 0;
+        this.globalNumberOfQuestion = 0;
+        this.globalNumberOfRightAnswers = 0;
     }
 }

@@ -10,7 +10,6 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 import java.io.IOException;
-import java.sql.*;
 import java.util.HashMap;
 import java.util.Optional;
 
@@ -34,7 +33,6 @@ public class Bot extends TelegramLongPollingBot {
         Bot bot = new Bot();
         TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
         telegramBotsApi.registerBot(bot);
-        bot.createDB();
     }
 
     @Override
@@ -109,7 +107,7 @@ public class Bot extends TelegramLongPollingBot {
                         }
                         break;
                     case "/statistics":
-                        watchResultsDB(message);
+                        watchStatistics(message);
                         break;
                 }
             }
@@ -168,10 +166,35 @@ public class Bot extends TelegramLongPollingBot {
             throw new RuntimeException(e);
         }
         watchResult(message);
-        addToResultsDB(message);
-        watchResultsDB(message);
+        addResults(message);
+        watchStatistics(message);
     }
 
+    private void watchStatistics(Message message) {
+        try {
+            Data thisData = data.get(message.getChatId());
+            execute(
+                    SendMessage.builder()
+                            .text("СТАТИСТИКА.\n" +
+                                    "Общее количество вопросов: " + thisData.globalNumberOfQuestion + "\n" +
+                                    "Общее количество правильных ответов: " + thisData.globalNumberOfRightAnswers + "\n" +
+                                    "Процент правильных ответов: " + thisData.globalNumberOfRightAnswers / thisData.globalNumberOfQuestion * 100 + "%\n")
+                            .chatId(message.getChatId().toString())
+                            .parseMode("HTML")
+                            .build());
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void addResults(Message message) {
+        Data thisData = data.get(message.getChatId());
+        thisData.globalNumberOfQuestion += thisData.numberOfQuestion;
+        thisData.globalNumberOfRightAnswers += thisData.numberOfRightAnswers;
+        data.put(message.getChatId(), thisData);
+    }
+
+    /*
     private void addToResultsDB(Message message) {
         try (Connection connection = DriverManager.getConnection("jdbc:h2:mem:default", "sa", "")) {
             Data thisData = data.get(message.getChatId());
@@ -219,6 +242,8 @@ public class Bot extends TelegramLongPollingBot {
             e.printStackTrace();
         }
     }
+
+     */
 
     private void watchResult(Message message) {
         Data thisData = data.get(message.getChatId());
