@@ -131,7 +131,12 @@ public class Bot extends TelegramLongPollingBot {
 
 
     private void startTest(Message message) {
-        Data thisData = new Data();
+        Data thisData;
+        if (data.get(message.getChatId()) == null) {
+            thisData = new Data();
+        } else {
+            thisData = data.get(message.getChatId());
+        }
         thisData.testStatus = "active";
         System.out.println(message.getChatId());
         data.put(message.getChatId(), thisData);
@@ -148,6 +153,7 @@ public class Bot extends TelegramLongPollingBot {
         generateTestWords(message);
         thisData = data.get(message.getChatId());
         thisData.numberOfQuestion = 0;
+        thisData.numberOfRightAnswers = 0;
         data.put(message.getChatId(), thisData);
         createTestQuestion(message);
     }
@@ -167,7 +173,11 @@ public class Bot extends TelegramLongPollingBot {
         }
         watchResult(message);
         addResults(message);
-        watchStatistics(message);
+        //watchStatistics(message);
+    }
+
+    public double calculatePercentage(double obtained, double total) {
+        return obtained * 100 / total;
     }
 
     private void watchStatistics(Message message) {
@@ -178,7 +188,7 @@ public class Bot extends TelegramLongPollingBot {
                             .text("СТАТИСТИКА.\n" +
                                     "Общее количество вопросов: " + thisData.globalNumberOfQuestion + "\n" +
                                     "Общее количество правильных ответов: " + thisData.globalNumberOfRightAnswers + "\n" +
-                                    "Процент правильных ответов: " + thisData.globalNumberOfRightAnswers / thisData.globalNumberOfQuestion * 100 + "%\n")
+                                    "Процент правильных ответов: " + calculatePercentage((double)thisData.globalNumberOfRightAnswers, (double)thisData.globalNumberOfQuestion) + "%")
                             .chatId(message.getChatId().toString())
                             .parseMode("HTML")
                             .build());
@@ -189,8 +199,9 @@ public class Bot extends TelegramLongPollingBot {
 
     private void addResults(Message message) {
         Data thisData = data.get(message.getChatId());
-        thisData.globalNumberOfQuestion += thisData.numberOfQuestion;
-        thisData.globalNumberOfRightAnswers += thisData.numberOfRightAnswers;
+        thisData.globalNumberOfQuestion = thisData.globalNumberOfQuestion + thisData.numberOfQuestion;
+        thisData.globalNumberOfRightAnswers = thisData.globalNumberOfRightAnswers + thisData.numberOfRightAnswers;
+        System.out.println(thisData.globalNumberOfQuestion + " " + thisData.globalNumberOfRightAnswers);
         data.put(message.getChatId(), thisData);
     }
 
